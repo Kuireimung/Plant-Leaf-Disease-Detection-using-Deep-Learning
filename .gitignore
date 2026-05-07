@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.gradio/
+.ruff_cache/
+.kaggle/kaggle.json

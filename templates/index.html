@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}" />
+  </head>
+  <body>
+    <div class="bg-mesh"></div>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="site-header fade-up">
+      <div class="brand-lockup">
+        <div class="brand-mark">CD</div>
+        <div>
+          <p class="brand-kicker">Crop Intelligence</p>
+          <h1 class="brand-name">Crop Disease Detector</h1>
+        </div>
+      </div>
+
+      <div class="header-pills">
+        <span class="status-pill {% if status.ready %}ready{% else %}waiting{% endif %}">
+          {% if status.ready %}Model ready{% else %}Checkpoint needed{% endif %}
+        </span>
+        <a class="ghost-link" href="#diagnosis">Run diagnosis</a>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero-grid fade-up">
+        <div class="hero-copy-block">
+          <p class="eyebrow">FastAPI Crop Diagnosis Service</p>
+          <h2>Professional leaf disease screening for bell pepper, potato, and tomato plants.</h2>
+          <p class="hero-copy">
+            Upload a single leaf image and receive a ranked disease prediction from your
+            trained PlantVillage ResNet model. The website is built for quick demos,
+            project presentations, and future expansion into a full agricultural product.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-link" href="#diagnosis">Start diagnosis</a>
+            <a class="secondary-link" href="#workflow">See workflow</a>
+          </div>
+
+          <div class="metric-row">
+            <article class="metric-card">
+              <strong>15</strong>
+              <span>diagnosis classes</span>
+            </article>
+            <article class="metric-card">
+              <strong>{{ supported_crops|length }}</strong>
+              <span>supported crop groups</span>
+            </article>
+            <article class="metric-card">
+              <strong>1</strong>
+              <span>image needed per scan</span>
+            </article>
+          </div>
+        </div>
+
+        <aside class="hero-status-card">
+          <p class="panel-kicker">System readiness</p>
+          <h3>Inference service status</h3>
+          <p class="status-copy">{{ status.message }}</p>
+
+          <div class="status-stack">
+            <div class="status-row">
+              <span>Deployment mode</span>
+              <strong>Browser upload workflow</strong>
+            </div>
+            <div class="status-row">
+              <span>Checkpoint</span>
+              <strong>{% if status.checkpoint_name %}{{ status.checkpoint_name }}{% else %}Not loaded yet{% endif %}</strong>
+            </div>
+            <div class="status-row">
+              <span>Backend</span>
+              <strong>FastAPI + PyTorch</strong>
+            </div>
+          </div>
+
+          <div class="hero-process">
+            <div class="process-step">
+              <span>01</span>
+              <p>Upload a clean leaf image.</p>
+            </div>
+            <div class="process-step">
+              <span>02</span>
+              <p>Run model inference instantly in the browser workflow.</p>
+            </div>
+            <div class="process-step">
+              <span>03</span>
+              <p>Review the top prediction, confidence, and alternatives.</p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="signal-band fade-up" id="workflow">
+        <article class="signal-card">
+          <p class="signal-title">Field-ready presentation</p>
+          <p class="signal-copy">A cleaner interface for project demos, portfolio reviews, and academic submissions.</p>
+        </article>
+        <article class="signal-card">
+          <p class="signal-title">Shared inference engine</p>
+          <p class="signal-copy">The website and Gradio version both use the same prediction code and checkpoint flow.</p>
+        </article>
+        <article class="signal-card">
+          <p class="signal-title">Upgrade path</p>
+          <p class="signal-copy">This layout can later grow into authentication, history, treatment guides, and deployment dashboards.</p>
+        </article>
+      </section>
+
+      <section class="workspace-grid" id="diagnosis">
+        <div class="panel upload-panel fade-up">
+          <div class="panel-head">
+            <p class="panel-kicker">Step 1</p>
+            <h3>Upload a leaf image</h3>
+            <p class="panel-copy">Use a close, bright photo with one main leaf in frame.</p>
+          </div>
+
+          <label class="dropzone" for="fileInput" id="dropzone">
+            <input id="fileInput" type="file" accept="image/*" />
+            <span class="dropzone-chip">Image input</span>
+            <span class="dropzone-title">Drop image here or click to browse</span>
+            <span class="dropzone-subtitle">Accepted: JPG, PNG, WEBP. Mobile camera shots work well too.</span>
+            <span class="selected-file" id="selectedFileName">No file selected yet.</span>
+          </label>
+
+          <div class="upload-actions">
+            <button class="primary-button" id="predictButton" type="button">Analyze leaf</button>
+            <p class="microcopy">This button sends the image to the local prediction endpoint and returns the top ranked classes.</p>
+          </div>
+
+          <div class="checklist-card">
+            <p class="summary-label">Before you upload</p>
+            <ul class="tips-list compact">
+              <li>Keep the leaf centered and sharp.</li>
+              <li>Prefer neutral or uncluttered backgrounds.</li>
+              <li>Avoid heavy blur, glare, or low light.</li>
+            </ul>
+          </div>
+
+          <div class="checkpoint-box">
+            <p class="summary-label">Model setup</p>
+            <p>{{ checkpoint_help }}</p>
+          </div>
+        </div>
+
+        <div class="panel preview-panel fade-up">
+          <div class="panel-head">
+            <p class="panel-kicker">Step 2</p>
+            <h3>Preview and crop confidence</h3>
+            <p class="panel-copy">Check the image before running the detector.</p>
+          </div>
+
+          <div class="preview-frame">
+            <img id="previewImage" alt="Leaf preview" hidden />
+            <div class="preview-placeholder" id="previewPlaceholder">
+              <p>Your uploaded leaf preview will appear here.</p>
+            </div>
+          </div>
+
+          <div class="preview-meta">
+            <span class="preview-status" id="previewStatus">Waiting for image upload</span>
+          </div>
+
+          <div class="supported-crops">
+            {% for crop in supported_crops %}
+            <span class="crop-pill">{{ crop }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="panel result-panel neutral fade-up" id="resultPanel">
+          <div class="panel-head">
+            <p class="panel-kicker">Step 3</p>
+            <h3>Diagnosis result</h3>
+            <p class="panel-copy">Review the top class and the confidence distribution.</p>
+          </div>
+
+          <div class="result-state" id="resultState">
+            Upload a leaf image and click "Analyze leaf" to see the prediction.
+          </div>
+
+          <div class="result-content" id="resultContent" hidden>
+            <div class="result-banner">
+              <span class="result-badge neutral" id="resultBadge">Awaiting result</span>
+              <p class="result-headline" id="resultHeadline">The model summary will appear here after analysis.</p>
+            </div>
+
+            <div class="result-summary">
+              <div>
+                <p class="summary-label">Top prediction</p>
+                <h4 id="resultLabel">-</h4>
+              </div>
+              <div>
+                <p class="summary-label">Confidence</p>
+                <p class="summary-value" id="resultConfidence">0%</p>
+              </div>
+            </div>
+
+            <div class="prediction-bars" id="predictionBars"></div>
+
+            <div class="note-card">
+              <p class="summary-label">Model note</p>
+              <p id="resultNotes">-</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="trust-grid fade-up">
+        <article class="trust-card">
+          <p class="panel-kicker">What this predicts</p>
+          <h3>Disease classification</h3>
+          <p>
+            The model ranks the most likely PlantVillage label from the uploaded leaf image
+            and returns the top alternatives to help you inspect uncertainty.
+          </p>
+        </article>
+
+        <article class="trust-card">
+          <p class="panel-kicker">What this does not replace</p>
+          <h3>Field validation</h3>
+          <p>
+            This is still a model-assisted result. Use it as a screening tool and verify
+            treatment decisions with agronomy guidance or local expertise.
+          </p>
+        </article>
+
+        <article class="trust-card">
+          <p class="panel-kicker">Where this can go next</p>
+          <h3>Production expansion</h3>
+          <p>
+            You can extend this website with history tracking, treatment suggestions,
+            farmer accounts, or hosted deployment when your project is ready.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer fade-up">
+      <p>Crop Disease Detector</p>
+      <span>FastAPI frontend for your trained plant disease model</span>
+    </footer>
+
+    <script src="{{ url_for('static', path='app.js') }}"></script>
+  </body>
+</html>
