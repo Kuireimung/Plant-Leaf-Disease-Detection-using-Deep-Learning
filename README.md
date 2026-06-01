@@ -1,6 +1,6 @@
 # Crop Disease Detector
 
-This project is a single FastAPI web app for crop disease detection using your trained PlantVillage model.
+This project is a single FastAPI web app for crop disease detection using your trained PlantVillage ResNet-18 and EfficientNet-B0 models.
 
 ## Local setup
 
@@ -43,17 +43,25 @@ $env:KAGGLE_CONFIG_DIR=".kaggle"
 .\.venv\Scripts\python.exe -m kaggle kernels output kuireimungkhaleng/crop-disease-detection -p ".\models" -o
 ```
 
-## Model checkpoint
+## Model checkpoints
 
-Copy your trained checkpoint from Kaggle into one of these locations:
+The repository includes both trained checkpoints needed for the app:
 
 - `models/resnet18_baseline_best.pt`
+- `models/efficientnet_b0_baseline_best.pt`
+
+If you download fresh checkpoints from Kaggle, copy them into one of these locations:
+
+- `models/resnet18_baseline_best.pt`
+- `models/efficientnet_b0_baseline_best.pt`
 - `reports/checkpoints/resnet18_baseline_best.pt`
+- `reports/checkpoints/efficientnet_b0_baseline_best.pt`
 
 You can also point the app to another path with:
 
 ```powershell
-$env:MODEL_CHECKPOINT="C:\full\path\to\your\checkpoint.pt"
+$env:RESNET_CHECKPOINT="C:\full\path\to\resnet18_baseline_best.pt"
+$env:EFFICIENTNET_CHECKPOINT="C:\full\path\to\efficientnet_b0_baseline_best.pt"
 ```
 
 The app expects the PlantVillage ResNet-18 training format used by the original notebook and reference repo.

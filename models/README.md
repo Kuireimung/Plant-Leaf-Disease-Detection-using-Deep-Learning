@@ -1,9 +1,10 @@
 # Model files
 
-Place your trained checkpoint here.
+Place your trained checkpoints here.
 
-Preferred filename:
+Preferred filenames:
 
 - `resnet18_baseline_best.pt`
+- `efficientnet_b0_baseline_best.pt`
 
-This app also checks `reports/checkpoints/` and the `MODEL_CHECKPOINT` environment variable.
+This app also checks `reports/checkpoints/`, `RESNET_CHECKPOINT`, `EFFICIENTNET_CHECKPOINT`, and `MODEL_CHECKPOINT`.
